@@ -9,6 +9,7 @@ A Next.js 14 web application that connects to your bank via Plaid, detects recur
 
 - 🔐 **Email/Password Authentication** via Supabase
 - 🏦 **Plaid Link Integration** for secure bank connections
+- 📄 **CSV Import** - Upload bank transaction exports as alternative to Plaid
 - 🔄 **Automatic Recurring Charge Detection** (weekly, biweekly, monthly, quarterly, yearly)
 - 📊 **Price Drift Tracking** with percent change and annualized rates
 - 🏪 **Merchant Normalization** to group similar merchant names
@@ -160,9 +161,28 @@ chargedrift/
 | `/api/plaid/create-link-token` | POST | Create Plaid Link token |
 | `/api/plaid/exchange-token` | POST | Exchange public token for access token |
 | `/api/plaid/sync-transactions` | POST | Sync transactions from Plaid |
+| `/api/csv/upload` | POST | Upload and process CSV file |
 | `/api/recurring/detect` | POST | Run recurring charge detection |
 | `/api/dashboard` | GET | Get dashboard data |
 | `/api/merchants/[id]` | GET | Get merchant price history |
+
+## CSV Import
+
+As an alternative to Plaid, you can upload CSV files exported from your bank. The parser supports:
+
+- Common date formats (MM/DD/YYYY, YYYY-MM-DD, etc.)
+- Various column names (Date, Description, Amount, Debit, Credit)
+- Automatic column detection
+- Quoted fields and escaped characters
+
+**Sample CSV format:**
+```csv
+Date,Description,Amount
+01/15/2024,Netflix,15.99
+02/15/2024,Netflix,17.99
+```
+
+You can download a sample CSV from the upload dialog to see the expected format.
 
 ## Pages
 

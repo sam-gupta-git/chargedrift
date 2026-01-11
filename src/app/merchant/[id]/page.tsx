@@ -1,13 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { MerchantPriceHistory } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/use-toast'
 import { formatCurrency, formatPercent, formatDate, formatFrequency, getChangeColor } from '@/lib/utils'
-import { ArrowLeft, TrendingUp, TrendingDown, Calendar, Loader2, AlertCircle } from 'lucide-react'
+import { ArrowLeft, TrendingUp, TrendingDown, Calendar, Loader2, AlertCircle, DollarSign, EyeOff } from 'lucide-react'
 
 export default function MerchantPage() {
   const params = useParams()
@@ -16,6 +17,9 @@ export default function MerchantPage() {
   const [data, setData] = useState<MerchantPriceHistory | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [excluding, setExcluding] = useState(false)
+  const router = useRouter()
+  const { toast } = useToast()
 
   useEffect(() => {
     const fetchMerchant = async () => {
@@ -36,6 +40,37 @@ export default function MerchantPage() {
 
     fetchMerchant()
   }, [merchantId])
+
+  const handleExclude = async () => {
+    setExcluding(true)
+    try {
+      const response = await fetch(`/api/merchants/${merchantId}/exclude`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ excluded: true }),
+      })
+      
+      const result = await response.json()
+      if (result.error) throw new Error(result.error)
+      
+      toast({
+        title: 'Merchant Hidden',
+        description: `${data?.merchant.name} will no longer appear in your dashboard.`,
+      })
+      
+      router.push('/dashboard')
+      router.refresh()
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to hide merchant'
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        variant: 'destructive',
+      })
+    } finally {
+      setExcluding(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -62,6 +97,14 @@ export default function MerchantPage() {
 
   const { merchant, recurring_charge, price_changes, transactions, summary } = data
 
+  // Calculate total spent and date range
+  const totalSpent = transactions.reduce((sum, tx) => sum + tx.amount, 0)
+  const sortedTransactions = [...transactions].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  )
+  const firstDate = sortedTransactions.length > 0 ? sortedTransactions[0].date : null
+  const lastDate = sortedTransactions.length > 0 ? sortedTransactions[sortedTransactions.length - 1].date : null
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -85,23 +128,71 @@ export default function MerchantPage() {
               )}
             </div>
             
-            {summary && (
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${summary.percent_change > 0 ? 'bg-red-500/10' : 'bg-green-500/10'}`}>
-                {summary.percent_change > 0 ? (
-                  <TrendingUp className="w-5 h-5 text-red-500" />
-                ) : (
-                  <TrendingDown className="w-5 h-5 text-green-500" />
-                )}
-                <span className={`text-lg font-bold ${getChangeColor(summary.percent_change)}`}>
-                  {formatPercent(summary.percent_change)}
-                </span>
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              {summary && (
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${summary.percent_change > 0 ? 'bg-red-500/10' : 'bg-green-500/10'}`}>
+                  {summary.percent_change > 0 ? (
+                    <TrendingUp className="w-5 h-5 text-red-500" />
+                  ) : (
+                    <TrendingDown className="w-5 h-5 text-green-500" />
+                  )}
+                  <span className={`text-lg font-bold ${getChangeColor(summary.percent_change)}`}>
+                    {formatPercent(summary.percent_change)}
+                  </span>
+                </div>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExclude}
+                disabled={excluding}
+                className="gap-2 text-muted-foreground hover:text-destructive hover:border-destructive"
+              >
+                <EyeOff className="w-4 h-4" />
+                {excluding ? 'Hiding...' : 'Hide'}
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-8">
+        {/* Total Spent Card */}
+        {transactions.length > 0 && (
+          <Card className="mb-8 opacity-0 animate-fade-in bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <CardContent className="py-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Spent</p>
+                    <p className="text-3xl font-bold font-mono text-primary">
+                      {formatCurrency(totalSpent)}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Date Range</p>
+                  <p className="font-medium">
+                    {firstDate && lastDate ? (
+                      <>
+                        {formatDate(firstDate)} — {formatDate(lastDate)}
+                      </>
+                    ) : (
+                      'N/A'
+                    )}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {transactions.length} transaction{transactions.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Summary cards */}
         {summary && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
