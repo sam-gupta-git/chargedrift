@@ -33,14 +33,16 @@ export function CSVUploadButton({ onSuccess }: CSVUploadButtonProps) {
           Import CSV
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Import Transactions</DialogTitle>
-          <DialogDescription>
-            Upload a CSV file from your bank to import transactions.
+      <DialogContent className="sm:max-w-[380px] w-[90vw] overflow-hidden p-4">
+        <DialogHeader className="pr-6">
+          <DialogTitle className="text-base">Import Transactions</DialogTitle>
+          <DialogDescription className="text-xs">
+            Upload a CSV file from your bank.
           </DialogDescription>
         </DialogHeader>
-        <CSVUpload onSuccess={handleSuccess} />
+        <div className="overflow-hidden">
+          <CSVUpload onSuccess={handleSuccess} />
+        </div>
       </DialogContent>
     </Dialog>
   )

@@ -140,11 +140,11 @@ export function CSVUpload({ onSuccess }: CSVUploadProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full max-w-full overflow-hidden">
       {!selectedFile ? (
         <>
           <div
-            className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
               dragActive
                 ? 'border-primary bg-primary/5'
                 : 'border-border hover:border-primary/50'
@@ -184,15 +184,15 @@ export function CSVUpload({ onSuccess }: CSVUploadProps) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-sm">
-            <p className="text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
+            <p className="text-muted-foreground text-xs sm:text-sm">
               CSV should have Date, Description, and Amount columns
             </p>
             <Button
               variant="ghost"
               size="sm"
               onClick={downloadSample}
-              className="gap-2 text-muted-foreground hover:text-foreground"
+              className="gap-2 text-muted-foreground hover:text-foreground shrink-0"
             >
               <Download className="w-3 h-3" />
               Download Sample
@@ -200,35 +200,36 @@ export function CSVUpload({ onSuccess }: CSVUploadProps) {
           </div>
         </>
       ) : (
-        <div className="space-y-4">
-          <div className="p-4 rounded-lg border border-border bg-card">
+        <div className="space-y-4 overflow-hidden">
+          <div className="p-3 rounded-lg border border-border bg-card">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-primary" />
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <FileText className="w-4 h-4 text-primary" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{selectedFile.name}</p>
-                <p className="text-sm text-muted-foreground">
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <p className="font-medium text-sm truncate max-w-full">{selectedFile.name}</p>
+                <p className="text-xs text-muted-foreground">
                   {(selectedFile.size / 1024).toFixed(1)} KB
                 </p>
               </div>
-              <Button variant="ghost" size="sm" onClick={handleClear}>
+              <Button variant="ghost" size="sm" onClick={handleClear} className="shrink-0">
                 Change
               </Button>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="import-name">Import Name</Label>
+          <div className="space-y-2 min-w-0">
+            <Label htmlFor="import-name" className="text-sm">Import Name</Label>
             <Input
               id="import-name"
               placeholder="e.g., chase-2024.csv"
               value={importName}
               onChange={(e) => setImportName(e.target.value)}
               disabled={loading}
+              className="text-sm min-w-0"
             />
             <p className="text-xs text-muted-foreground">
-              Give this import a name to identify it later (must end in .csv)
+              Name to identify this import (must end in .csv)
             </p>
           </div>
 

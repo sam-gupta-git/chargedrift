@@ -437,6 +437,15 @@ export default function DashboardPage() {
                   )
                 }
                 
+                // Helper to get account name from ID
+                const getAccountName = (accountId: string) => {
+                  const account = data?.accounts?.find(a => a.id === accountId)
+                  if (!account) return null
+                  return account.institution_name === 'CSV Import' 
+                    ? account.account_name 
+                    : account.institution_name
+                }
+                
                 return (
                   <div className="space-y-2">
                     {filteredCharges.map((charge, index) => (
@@ -451,6 +460,12 @@ export default function DashboardPage() {
                             <h3 className="font-semibold">{charge.merchants?.name || 'Unknown'}</h3>
                             <p className="text-sm text-muted-foreground">
                               {formatFrequency(charge.frequency)} · {charge.transaction_count} transactions
+                              {!selectedAccountId && charge.account_ids?.length > 0 && (
+                                <span className="text-muted-foreground/70">
+                                  {' · '}
+                                  {charge.account_ids.map(id => getAccountName(id)).filter(Boolean).join(', ')}
+                                </span>
+                              )}
                             </p>
                           </div>
                           <div className="text-right">
