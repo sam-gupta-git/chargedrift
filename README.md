@@ -1,5 +1,9 @@
 # ChargeDrift - Recurring Charge Drift Detector
 
+
+
+https://chargedrift.vercel.app/
+
 A Next.js 14 web application that connects to your bank via Plaid, detects recurring charges (subscriptions, memberships, etc.), and identifies when merchants have increased their prices over time.
 
 **The app answers one question:**
