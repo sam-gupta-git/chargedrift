@@ -387,7 +387,7 @@ export default function DashboardPage() {
             {(() => {
               // Filter price drift by selected account
               const filteredDrift = selectedAccountId
-                ? data?.drift_summary?.filter((d: { account_ids?: string[] }) => 
+                ? data?.drift_summary?.filter(d => 
                     d.account_ids?.includes(selectedAccountId)
                   ) || []
                 : data?.drift_summary || []

@@ -110,6 +110,7 @@ export interface PriceDriftSummary {
   percent_change: number;
   annualized_increase: number;
   is_active: boolean;
+  account_ids?: string[];
 }
 
 // API response types

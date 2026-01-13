@@ -35,11 +35,11 @@ export async function DELETE(
       .eq('account_id', accountId)
       .eq('user_id', user.id)
     
-    const affectedMerchantIds = [...new Set(
+    const affectedMerchantIds = Array.from(new Set(
       (affectedTx || [])
         .map(t => t.merchant_id)
         .filter(Boolean)
-    )]
+    ))
     
     // Delete all transactions for this account
     const { error: txDeleteError } = await supabase
